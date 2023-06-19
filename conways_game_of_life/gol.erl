@@ -1,5 +1,5 @@
 -module(gol).
--export([new/2, query/3, print/1, assign/4, demo_grid/0]).
+-export([new/2, query/3, print/1, assign/4, demo_grid/0, count_neighbors/3, game_logic/2]).
 
 % step_cell/3, simulate/1, run_simulation/2,
 -record(grid, {height=10, width=10, rows}).
@@ -29,6 +29,32 @@ draw(Value) ->
         empty -> "-";
         alive -> "*"
     end.
+
+count_neighbors(Grid, Y, X) ->
+    N  = query(Grid, Y + 1, X + 0),
+    NE = query(Grid, Y + 1, X + 1),
+    E  = query(Grid, Y + 0, X + 1),
+    SE = query(Grid, Y - 1, X + 1),
+    S  = query(Grid, Y - 1, X - 0),
+    SW = query(Grid, Y - 1, X - 1),
+    W  = query(Grid, Y - 0, X - 1),
+    NW = query(Grid, Y + 1, X - 1),
+    NeighborStates = [N, NE, E, SE, S, SW, W, NW],
+    length(lists:filter(fun(State) -> State == alive end, NeighborStates)).
+
+game_logic(State, Neighbors) ->
+    case State of
+        alive -> if
+            Neighbors < 2 -> empty; % Die: Too few
+            Neighbors > 3 -> empty; % Die: Too many
+            true -> alive
+        end;
+        empty -> if
+            Neighbors == 3 -> alive;
+            true -> State
+        end
+    end.
+
 print(Grid) ->
     ColumnIndex = lists:seq(0, Grid#grid.width - 1),
     RowIndex = lists:seq(0, Grid#grid.height - 1),
