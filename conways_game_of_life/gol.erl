@@ -1,7 +1,6 @@
 -module(gol).
--export([new/2, query/3, print/1, assign/4, demo_grid/0, count_neighbors/3, game_logic/2, step_cell/3, simulate/1]).
+-export([new/2, query/3, print/1, assign/4, demo_grid/0, count_neighbors/3, game_logic/2, step_cell/3, simulate/1, run_simulation/2]).
 
-% , , run_simulation/2,
 -record(grid, {height=10, width=10, rows}).
 -record(transition, {y, x, state}).
 
@@ -86,3 +85,19 @@ print(Grid) ->
         Grid3 = assign(Grid2, 2, 2, alive),
         Grid4 = assign(Grid3, 2, 3, alive),
         assign(Grid4, 2, 4, alive).
+
+clear_screen() ->
+    io:format("\ec").
+
+run_simulation(Grid, N) ->
+    clear_screen(),
+    UpdatedGrid = simulate(Grid),
+    print(UpdatedGrid),
+    timer:sleep(1000),
+    case N > 0 of
+        true  -> run_simulation(UpdatedGrid, N - 1);
+        false -> end_simulation()
+    end.
+
+end_simulation() ->
+    io:format("~nSimulation ended.~n").
