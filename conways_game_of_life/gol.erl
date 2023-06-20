@@ -1,7 +1,7 @@
 -module(gol).
--export([new/2, query/3, print/1, assign/4, demo_grid/0, count_neighbors/3, game_logic/2]).
+-export([new/2, query/3, print/1, assign/4, demo_grid/0, count_neighbors/3, game_logic/2, step_cell/3, simulate/1]).
 
-% step_cell/3, simulate/1, run_simulation/2,
+% , , run_simulation/2,
 -record(grid, {height=10, width=10, rows}).
 -record(transition, {y, x, state}).
 
@@ -55,6 +55,20 @@ game_logic(State, Neighbors) ->
         end
     end.
 
+step_cell(Grid, Y, X) ->
+    State = query(Grid, Y, X),
+    Neighbors = count_neighbors(Grid, Y, X),
+    NextState = game_logic(State, Neighbors),
+    #transition{y=Y, x=X, state=NextState}.
+
+simulate(Grid) ->
+    Rows = array:map(fun(Y, Row) ->
+        array:map(fun(X, _CellValue) ->
+            Transition = step_cell(Grid, Y, X),
+            Transition#transition.state
+        end, Row)
+    end, Grid#grid.rows),
+    Grid#grid{rows=Rows}.
 print(Grid) ->
     ColumnIndex = lists:seq(0, Grid#grid.width - 1),
     RowIndex = lists:seq(0, Grid#grid.height - 1),
